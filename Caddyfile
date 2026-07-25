@@ -1,0 +1,7 @@
+findacourt.xyz, www.findacourt.xyz {
+	reverse_proxy frontend:3000
+}
+
+api.findacourt.xyz {
+	reverse_proxy backend:4000
+}

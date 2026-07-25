@@ -6,8 +6,8 @@ import { useTheme } from "next-themes";
 import { SPORTS, getSportBySlug, type SportSlug } from "shared";
 import { SportMarkersLayer } from "@/components/SportMarkersLayer";
 
-const DEFAULT_CENTER = { lat: 46.6034, lng: 1.8883 }; // Geographic center of France
-const DEFAULT_ZOOM = 5;
+const DEFAULT_CENTER = { lat: 45.5019, lng: -73.5674 }; // Montreal, QC
+const DEFAULT_ZOOM = 11;
 const USER_ZOOM = 13;
 
 // Google's own "current location" blue — distinct from the sport-place pins.
