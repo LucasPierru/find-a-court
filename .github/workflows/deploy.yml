@@ -58,6 +58,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  debug-vars:
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - run: echo "DEPLOY_ENABLED is -->${{ vars.DEPLOY_ENABLED }}<--"
+
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
