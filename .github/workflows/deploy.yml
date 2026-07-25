@@ -58,14 +58,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  debug-vars:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "DEPLOY_ENABLED is -->${{ vars.DEPLOY_ENABLED }}<--"
-
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+    # Bound to the "Production" GitHub Environment - that's where
+    # DEPLOY_ENABLED and the SSH_* secrets actually live. Without this key
+    # the job can't see any of them (they resolve to empty, not an error).
+    environment: Production
     # No-ops until the VPS exists and these secrets are set - see
     # infra/README.md for the full list. A custom `if:` replaces the
     # implicit "needs succeeded" check, so success() has to be spelled out.
