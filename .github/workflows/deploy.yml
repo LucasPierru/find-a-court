@@ -58,12 +58,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  debug-vars:
-    runs-on: ubuntu-latest
-    environment: Production
-    steps:
-      - run: echo "DEPLOY_ENABLED is -->${{ vars.DEPLOY_ENABLED }}<--"
-
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
@@ -71,10 +65,9 @@ jobs:
     # DEPLOY_ENABLED and the SSH_* secrets actually live. Without this key
     # the job can't see any of them (they resolve to empty, not an error).
     environment: Production
-    # TEMP DEBUG: forced unconditional to isolate whether the environment
-    # binding itself (e.g. a deployment branch policy) is blocking this job,
-    # separate from the DEPLOY_ENABLED condition.
-    if: true
+    # A custom `if:` replaces the implicit "needs succeeded" check, so
+    # success() has to be spelled out.
+    if: ${{ success() && vars.DEPLOY_ENABLED == 'true' }}
     steps:
       - uses: actions/checkout@v4
 
