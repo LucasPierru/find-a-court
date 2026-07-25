@@ -7,8 +7,10 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/find-a-court-backend
-  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/find-a-court-frontend
+  # GHCR requires lowercase repo names; github.repository_owner preserves
+  # actual casing (LucasPierru), so it's hardcoded lowercase here instead.
+  BACKEND_IMAGE: ghcr.io/lucaspierru/find-a-court-backend
+  FRONTEND_IMAGE: ghcr.io/lucaspierru/find-a-court-frontend
 
 jobs:
   build-and-push:
