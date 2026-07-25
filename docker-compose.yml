@@ -1,0 +1,31 @@
+# Local build-and-run parity check. NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is read
+# from frontend/.env.local (the same file the native `npm run dev` uses) so
+# the key isn't duplicated anywhere else - point Compose at it explicitly:
+#   docker compose --env-file frontend/.env.local up --build
+#
+# This is NOT the day-to-day dev workflow (keep using `npm run dev` from a
+# native Windows terminal for that) - it's for verifying the Dockerfiles/prod
+# image behavior before pushing.
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: "4000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY:-}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend

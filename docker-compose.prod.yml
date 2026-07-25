@@ -1,0 +1,25 @@
+# Deployed on the VPS by .github/workflows/deploy.yml. Pulls prebuilt images
+# from GHCR instead of building on the server. Copied to the server as
+# docker-compose.yml alongside a hand-maintained backend/.env.
+#
+# Manual use on the server:
+#   docker compose pull && docker compose up -d
+
+services:
+  backend:
+    image: ghcr.io/lucaspierru/find-a-court-backend:latest
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: "4000"
+    env_file:
+      - backend.env
+
+  frontend:
+    image: ghcr.io/lucaspierru/find-a-court-frontend:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
