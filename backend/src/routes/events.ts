@@ -9,14 +9,27 @@ import * as messagesService from "../services/messages";
 const listQuerySchema = z.object({
   sportId: sportSlugSchema.optional(),
   upcoming: z.enum(["true", "false"]).optional(),
+  q: z.string().optional(),
+  location: z.string().optional(),
+  page: z.coerce.number().int().positive().optional(),
+  pageSize: z.coerce.number().int().positive().max(50).optional(),
 });
 
 const eventsRouter = Router();
 
 eventsRouter.get("/", async (req, res, next) => {
   try {
-    const { sportId, upcoming } = parseOrThrow(listQuerySchema, req.query);
-    res.json(await eventsService.list({ sportId, upcomingOnly: upcoming === "true" }));
+    const { sportId, upcoming, q, location, page, pageSize } = parseOrThrow(listQuerySchema, req.query);
+    res.json(
+      await eventsService.list({
+        sportId,
+        upcomingOnly: upcoming === "true",
+        keyword: q,
+        location,
+        page: page ?? 1,
+        pageSize: pageSize ?? 12,
+      }),
+    );
   } catch (error) {
     next(error);
   }

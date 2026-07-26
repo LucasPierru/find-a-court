@@ -1,9 +1,16 @@
-import type { CreateEvent, Event, UpdateEvent, User } from "shared";
+import type { CreateEvent, Event, EventListResponse, UpdateEvent, User } from "shared";
 import * as eventsRepository from "../repositories/events";
 import { AppError } from "../utils/errors";
 
-export async function list(filters: eventsRepository.EventFilters): Promise<Event[]> {
-  return eventsRepository.findAll(filters);
+export async function list(filters: eventsRepository.EventFilters): Promise<EventListResponse> {
+  const { events, total } = await eventsRepository.findAll(filters);
+  return {
+    events,
+    page: filters.page,
+    pageSize: filters.pageSize,
+    total,
+    totalPages: Math.max(1, Math.ceil(total / filters.pageSize)),
+  };
 }
 
 export async function getById(id: string): Promise<Event> {

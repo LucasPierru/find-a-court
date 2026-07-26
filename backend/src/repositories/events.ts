@@ -55,9 +55,18 @@ function toEvent(row: EventRow): Event {
 export interface EventFilters {
   sportId?: string;
   upcomingOnly?: boolean;
+  keyword?: string;
+  location?: string;
+  page: number;
+  pageSize: number;
 }
 
-export async function findAll(filters: EventFilters): Promise<Event[]> {
+export interface PaginatedEvents {
+  events: Event[];
+  total: number;
+}
+
+export async function findAll(filters: EventFilters): Promise<PaginatedEvents> {
   const conditions: string[] = [];
   const params: unknown[] = [];
 
@@ -68,13 +77,32 @@ export async function findAll(filters: EventFilters): Promise<Event[]> {
   if (filters.upcomingOnly) {
     conditions.push(`e.start_time >= now()`);
   }
+  if (filters.keyword) {
+    params.push(`%${filters.keyword}%`);
+    conditions.push(`(e.title ILIKE $${params.length} OR e.description ILIKE $${params.length})`);
+  }
+  if (filters.location) {
+    params.push(`%${filters.location}%`);
+    conditions.push(`(l.name ILIKE $${params.length} OR l.address ILIKE $${params.length})`);
+  }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
-  const result = await pool.query<EventRow>(
-    `SELECT ${EVENT_COLUMNS} FROM events e JOIN locations l ON l.id = e.location_id ${where} ORDER BY e.start_time ASC`,
+  const offset = (filters.page - 1) * filters.pageSize;
+  params.push(filters.pageSize, offset);
+  const limitParam = params.length - 1;
+  const offsetParam = params.length;
+
+  const result = await pool.query<EventRow & { total_count: string }>(
+    `SELECT ${EVENT_COLUMNS}, COUNT(*) OVER() AS total_count
+     FROM events e JOIN locations l ON l.id = e.location_id
+     ${where}
+     ORDER BY e.start_time ASC
+     LIMIT $${limitParam} OFFSET $${offsetParam}`,
     params,
   );
-  return result.rows.map(toEvent);
+
+  const total = result.rows[0] ? Number(result.rows[0].total_count) : 0;
+  return { events: result.rows.map(toEvent), total };
 }
 
 export async function findById(id: string): Promise<Event | null> {

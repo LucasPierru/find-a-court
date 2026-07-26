@@ -41,3 +41,13 @@ export const eventParticipantSchema = z.object({
 });
 
 export type EventParticipant = z.infer<typeof eventParticipantSchema>;
+
+export const eventListResponseSchema = z.object({
+  events: z.array(eventSchema),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
+  total: z.number().int().nonnegative(),
+  totalPages: z.number().int().nonnegative(),
+});
+
+export type EventListResponse = z.infer<typeof eventListResponseSchema>;

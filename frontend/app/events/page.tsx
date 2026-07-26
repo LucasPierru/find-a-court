@@ -1,6 +1,7 @@
 import { SPORTS } from "shared";
 import { EventCard } from "@/components/EventCard";
 import { EventFilterBar } from "@/components/EventFilterBar";
+import { Pagination } from "@/components/Pagination";
 import { searchEvents } from "@/lib/events";
 import { getSportPhotoUrls } from "@/lib/unsplash";
 
@@ -10,15 +11,28 @@ type EventsPageProps = {
     q?: string;
     location?: string;
     created?: string;
+    page?: string;
   }>;
 };
 
+function buildPageHref(params: { sport?: string; q?: string; location?: string }, page: number): string {
+  const search = new URLSearchParams();
+  if (params.sport) search.set("sport", params.sport);
+  if (params.q) search.set("q", params.q);
+  if (params.location) search.set("location", params.location);
+  if (page > 1) search.set("page", String(page));
+  const query = search.toString();
+  return query ? `/events?${query}` : "/events";
+}
+
 export default async function EventsPage({ searchParams }: EventsPageProps) {
   const params = await searchParams;
-  const events = await searchEvents({
+  const page = params.page ? Math.max(1, Number(params.page) || 1) : 1;
+  const result = await searchEvents({
     sport: params.sport,
     keyword: params.q,
     location: params.location,
+    page,
   });
   const sportPhotoUrls = await getSportPhotoUrls();
 
@@ -42,14 +56,22 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
         />
       </div>
 
-      {events.length === 0 ? (
+      {result.events.length === 0 ? (
         <p className="mt-10 text-sm text-zinc-600 dark:text-zinc-400">No events match your filters.</p>
       ) : (
-        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {events.map((event) => (
-            <EventCard key={event.id} event={event} imageUrl={sportPhotoUrls[event.sportId]} />
-          ))}
-        </div>
+        <>
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {result.events.map((event) => (
+              <EventCard key={event.id} event={event} imageUrl={sportPhotoUrls[event.sportId]} />
+            ))}
+          </div>
+
+          <Pagination
+            page={result.page}
+            totalPages={result.totalPages}
+            buildHref={(targetPage) => buildPageHref(params, targetPage)}
+          />
+        </>
       )}
     </div>
   );
