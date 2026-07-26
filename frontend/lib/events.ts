@@ -1,14 +1,9 @@
-import type { Event } from "shared";
-import { mockEvents } from "./mock-data";
-
-// All functions are async, even though currently backed by an in-memory
-// array, so call sites don't need to change once these become real fetches
-// to the backend.
+import type { Event, User } from "shared";
+import { ApiError, apiFetch } from "./api";
 
 export async function getRecentEvents(limit = 6): Promise<Event[]> {
-  return [...mockEvents]
-    .sort((a, b) => a.startTime.localeCompare(b.startTime))
-    .slice(0, limit);
+  const events = await apiFetch<Event[]>("/v1/events?upcoming=true");
+  return events.slice(0, limit);
 }
 
 export type EventFilters = {
@@ -17,12 +12,16 @@ export type EventFilters = {
   location?: string;
 };
 
+// The backend only filters by sportId server-side; keyword/location matching
+// happens here, same as it did against the in-memory mock data before.
 export async function searchEvents(filters: EventFilters): Promise<Event[]> {
+  const query = filters.sport ? `?sportId=${encodeURIComponent(filters.sport)}` : "";
+  const events = await apiFetch<Event[]>(`/v1/events${query}`);
+
   const keyword = filters.keyword?.trim().toLowerCase();
   const location = filters.location?.trim().toLowerCase();
 
-  return mockEvents
-    .filter((event) => !filters.sport || event.sportId === filters.sport)
+  return events
     .filter(
       (event) =>
         !keyword ||
@@ -34,10 +33,20 @@ export async function searchEvents(filters: EventFilters): Promise<Event[]> {
         !location ||
         event.location.name.toLowerCase().includes(location) ||
         event.location.address.toLowerCase().includes(location),
-    )
-    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+    );
 }
 
 export async function getEventById(id: string): Promise<Event | undefined> {
-  return mockEvents.find((event) => event.id === id);
+  try {
+    return await apiFetch<Event>(`/v1/events/${id}`);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
+export async function getEventParticipants(id: string): Promise<User[]> {
+  return apiFetch<User[]>(`/v1/events/${id}/participants`);
 }

@@ -1,20 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SPORTS, createEventInputSchema, type CreateEventInput } from "shared";
+import Link from "next/link";
+import { SPORTS, createEventSchema, type CreateEvent, type Event } from "shared";
 import {
   AddressAutocomplete,
   type SelectedPlace,
 } from "@/components/AddressAutocomplete";
+import { useAuth } from "@/contexts/AuthContext";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import { ApiError, apiFetch } from "@/lib/api";
 import { Button, Field, Form, Input, Select, Textarea } from "@/components/ui";
 
-function getDefaultValues(searchParams: URLSearchParams): CreateEventInput {
+function getDefaultValues(searchParams: URLSearchParams): CreateEvent {
   const sportParam = searchParams.get("sport");
   const sportId = SPORTS.some((sport) => sport.id === sportParam)
-    ? (sportParam as CreateEventInput["sportId"])
+    ? (sportParam as CreateEvent["sportId"])
     : SPORTS[0].id;
   const lat = searchParams.get("lat");
   const lng = searchParams.get("lng");
@@ -41,6 +45,8 @@ export function CreateEventForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const geolocation = useGeolocation();
+  const { status, accessToken } = useAuth();
+  const [submitError, setSubmitError] = useState<string | null>(null);
   // Read once — react-hook-form only consumes defaultValues on the initial
   // render, so this doesn't need to track searchParams changes.
   const initialValues = getDefaultValues(searchParams);
@@ -51,8 +57,8 @@ export function CreateEventForm() {
     watch,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<CreateEventInput>({
-    resolver: zodResolver(createEventInputSchema),
+  } = useForm<CreateEvent>({
+    resolver: zodResolver(createEventSchema),
     defaultValues: initialValues,
   });
 
@@ -72,11 +78,31 @@ export function CreateEventForm() {
       ? { lat: geolocation.position.lat, lng: geolocation.position.lng }
       : undefined;
 
-  const onSubmit = (values: CreateEventInput) => {
-    // TODO: replace with POST /events once the backend exposes it.
-    console.log("[mock] create event", values);
-    router.push("/events?created=1");
+  const onSubmit = async (values: CreateEvent) => {
+    setSubmitError(null);
+    try {
+      await apiFetch<Event>("/v1/events", { method: "POST", body: values, accessToken: accessToken ?? undefined });
+      router.push("/events?created=1");
+    } catch (error) {
+      setSubmitError(error instanceof ApiError ? error.message : "Something went wrong");
+    }
   };
+
+  if (status === "loading") {
+    return null;
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        You need to{" "}
+        <Link href="/login" className="font-medium text-black underline underline-offset-2 dark:text-zinc-50">
+          sign in
+        </Link>{" "}
+        before creating an event.
+      </p>
+    );
+  }
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
@@ -158,6 +184,8 @@ export function CreateEventForm() {
           })}
         />
       </Field>
+
+      {submitError && <p className="text-sm text-red-600 dark:text-red-400">{submitError}</p>}
 
       <Button type="submit" disabled={isSubmitting} className="mt-2 self-start">
         Create event

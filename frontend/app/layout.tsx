@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import { Navbar } from "@/components/Navbar";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { PAGE_WIDTH_CLASS } from "@/lib/layout";
 
 const geistSans = Geist({
@@ -33,10 +34,12 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Navbar />
-          <main className={`flex flex-1 flex-col ${PAGE_WIDTH_CLASS}`}>
-            {children}
-          </main>
+          <AuthProvider>
+            <Navbar />
+            <main className={`flex flex-1 flex-col ${PAGE_WIDTH_CLASS}`}>
+              {children}
+            </main>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

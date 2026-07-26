@@ -27,9 +27,8 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
       </h1>
 
       {params.created === "1" && (
-        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
-          Event created — but there&apos;s no backend yet to persist it, so it
-          won&apos;t appear below until one exists.
+        <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
+          Event created.
         </div>
       )}
 

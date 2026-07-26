@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getSportBySlug } from "shared";
-import { getEventById } from "@/lib/events";
+import { EventParticipation } from "@/components/EventParticipation";
+import { getEventById, getEventParticipants } from "@/lib/events";
 import { formatEventDateTime } from "@/lib/format";
 
 type EventDetailPageProps = {
@@ -16,6 +17,7 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
   }
 
   const sport = getSportBySlug(event.sportId);
+  const participants = await getEventParticipants(id);
 
   return (
     <div className="flex-1 py-16">
@@ -76,6 +78,12 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
           {event.description}
         </p>
       )}
+
+      <EventParticipation
+        eventId={event.id}
+        organizerId={event.organizerId}
+        initialParticipants={participants}
+      />
     </div>
   );
 }
