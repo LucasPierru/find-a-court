@@ -20,7 +20,6 @@ export function useEventChat(eventId: string) {
     if (!accessToken) return;
 
     let cancelled = false;
-    setIsLoadingHistory(true);
 
     apiFetch<Message[]>(`/v1/events/${eventId}/messages`, { accessToken })
       .then((history) => {

@@ -89,7 +89,7 @@ export function EventParticipation({
 
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-      {isParticipant && <EventChat eventId={eventId} />}
+      {isParticipant && <EventChat key={eventId} eventId={eventId} />}
     </div>
   );
 }
