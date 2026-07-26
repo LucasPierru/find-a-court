@@ -34,6 +34,12 @@ export type Sport = z.infer<typeof sportSchema>;
 
 export const SPORTS: readonly Sport[] = SPORT_DEFINITIONS;
 
+export const createSportSchema = sportSchema;
+export type CreateSport = z.infer<typeof createSportSchema>;
+
+export const updateSportSchema = sportSchema.omit({ id: true }).partial();
+export type UpdateSport = z.infer<typeof updateSportSchema>;
+
 export function getSportBySlug(slug: string): Sport | undefined {
   return SPORTS.find((sport) => sport.id === slug);
 }

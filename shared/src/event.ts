@@ -17,7 +17,7 @@ export const eventSchema = z.object({
 
 export type Event = z.infer<typeof eventSchema>;
 
-export const createEventInputSchema = eventSchema
+export const createEventSchema = eventSchema
   .omit({ id: true, organizerId: true, location: true })
   .extend({ location: locationSchema.omit({ id: true }) })
   .refine((event) => event.isFree || event.price !== undefined, {
@@ -25,4 +25,20 @@ export const createEventInputSchema = eventSchema
     path: ["price"],
   });
 
-export type CreateEventInput = z.infer<typeof createEventInputSchema>;
+export type CreateEvent = z.infer<typeof createEventSchema>;
+
+// Location and organizer aren't reassignable through an update - only the
+// event's own fields are.
+export const updateEventSchema = eventSchema
+  .omit({ id: true, organizerId: true, location: true })
+  .partial();
+
+export type UpdateEvent = z.infer<typeof updateEventSchema>;
+
+export const eventParticipantSchema = z.object({
+  eventId: z.string(),
+  userId: z.string(),
+  joinedAt: z.iso.datetime({ offset: true }),
+});
+
+export type EventParticipant = z.infer<typeof eventParticipantSchema>;

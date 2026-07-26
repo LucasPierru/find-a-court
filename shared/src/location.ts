@@ -12,3 +12,9 @@ export const locationSchema = z.object({
 });
 
 export type Location = z.infer<typeof locationSchema>;
+
+export const createLocationSchema = locationSchema.omit({ id: true });
+export type CreateLocation = z.infer<typeof createLocationSchema>;
+
+export const updateLocationSchema = createLocationSchema.partial();
+export type UpdateLocation = z.infer<typeof updateLocationSchema>;

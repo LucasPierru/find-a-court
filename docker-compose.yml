@@ -1,13 +1,18 @@
-# Local build-and-run parity check. NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is read
-# from frontend/.env.local (the same file the native `npm run dev` uses) so
-# the key isn't duplicated anywhere else - point Compose at it explicitly:
-#   docker compose --env-file frontend/.env.local up --build
-#
-# This is NOT the day-to-day dev workflow (keep using `npm run dev` from a
-# native Windows terminal for that) - it's for verifying the Dockerfiles/prod
-# image behavior before pushing.
-
 services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: find_a_court
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./backend/sql/seed-sports.sql:/docker-entrypoint-initdb.d/02-seed-sports.sql:ro
+
   backend:
     build:
       context: .
@@ -17,6 +22,9 @@ services:
       - "4000:4000"
     environment:
       PORT: "4000"
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/find_a_court
+    depends_on:
+      - postgres
 
   frontend:
     build:
@@ -29,3 +37,6 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+
+volumes:
+  postgres_data:
