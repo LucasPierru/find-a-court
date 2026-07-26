@@ -4,6 +4,7 @@
 # package.json present to resolve the lockfile), e.g.:
 #   docker build -f frontend/Dockerfile \
 #     --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=xxx \
+#     --build-arg NEXT_PUBLIC_API_URL=https://api.example.com \
 #     -t find-a-court-frontend .
 
 FROM node:20-alpine AS deps
@@ -16,10 +17,12 @@ RUN npm ci --workspace=frontend --workspace=shared
 
 FROM node:20-alpine AS builder
 WORKDIR /app
-# NEXT_PUBLIC_* vars are inlined into the client bundle at build time, so the
-# key has to be supplied as a build arg, not a runtime env var.
+# NEXT_PUBLIC_* vars are inlined into the client bundle at build time, so
+# they have to be supplied as build args, not runtime env vars.
 ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json /app/package-lock.json ./
 COPY shared shared
