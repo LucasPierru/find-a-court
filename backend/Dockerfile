@@ -1,8 +1,4 @@
 # syntax=docker/dockerfile:1
-#
-# Build context is the repo root (npm workspaces need every workspace's
-# package.json present to resolve the lockfile), e.g.:
-#   docker build -f backend/Dockerfile -t find-a-court-backend .
 
 FROM node:20-alpine AS deps
 WORKDIR /app

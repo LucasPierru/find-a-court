@@ -15,9 +15,6 @@ type ApiFetchOptions = Omit<RequestInit, "body"> & {
   accessToken?: string;
 };
 
-// credentials: "include" so the httpOnly refresh-token cookie rides along on
-// every request - harmless on routes that don't need it, required on
-// /v1/auth/refresh and /v1/auth/logout.
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
   const { body, accessToken, headers, ...rest } = options;
 

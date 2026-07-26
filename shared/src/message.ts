@@ -4,6 +4,7 @@ export const messageSchema = z.object({
   id: z.string(),
   eventId: z.string(),
   userId: z.string(),
+  userName: z.string(),
   content: z.string().min(1),
   createdAt: z.iso.datetime({ offset: true }),
 });

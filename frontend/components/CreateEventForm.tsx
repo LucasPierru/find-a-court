@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { SPORTS, createEventSchema, type CreateEvent, type Event } from "shared";
 import {
   AddressAutocomplete,
@@ -45,10 +44,8 @@ export function CreateEventForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const geolocation = useGeolocation();
-  const { status, accessToken } = useAuth();
+  const { status, accessToken, openAuthModal } = useAuth();
   const [submitError, setSubmitError] = useState<string | null>(null);
-  // Read once — react-hook-form only consumes defaultValues on the initial
-  // render, so this doesn't need to track searchParams changes.
   const initialValues = getDefaultValues(searchParams);
 
   const {
@@ -72,7 +69,6 @@ export function CreateEventForm() {
     setValue("location.placeId", place.placeId);
   };
 
-  // Biases address suggestions toward the user's current position, once known.
   const locationBias =
     geolocation.status === "success"
       ? { lat: geolocation.position.lat, lng: geolocation.position.lng }
@@ -96,9 +92,13 @@ export function CreateEventForm() {
     return (
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         You need to{" "}
-        <Link href="/login" className="font-medium text-black underline underline-offset-2 dark:text-zinc-50">
+        <button
+          type="button"
+          onClick={openAuthModal}
+          className="font-medium text-black underline underline-offset-2 dark:text-zinc-50"
+        >
           sign in
-        </Link>{" "}
+        </button>{" "}
         before creating an event.
       </p>
     );

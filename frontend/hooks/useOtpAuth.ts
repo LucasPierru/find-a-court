@@ -28,7 +28,6 @@ export function useOtpAuth() {
     }
   }
 
-  // Returns whether verification succeeded, so the caller can redirect.
   async function verifyCode(code: string, name?: string): Promise<boolean> {
     setError(null);
     setIsSubmitting(true);

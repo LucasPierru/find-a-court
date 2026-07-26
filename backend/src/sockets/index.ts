@@ -20,9 +20,6 @@ function emitError(socket: Socket, err: unknown, fallback: string): void {
   socket.emit(SOCKET_EVENTS.SOCKET_ERROR, { message });
 }
 
-// Chat access mirrors the REST side: only participants of an event (see
-// event_participants, via events.assertParticipant) may join its room or
-// send into it.
 export function createSocketServer(httpServer: HttpServer): Server {
   const io = new Server(httpServer, {
     cors: { origin: env.corsOrigin, credentials: true },

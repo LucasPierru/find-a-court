@@ -55,13 +55,6 @@ export function verifyAccessToken(token: string): AuthenticatedUser {
   return verifyToken(token, env.accessTokenSecret, "access");
 }
 
-// Signed with a separate secret from access tokens, and carries a `type`
-// claim so an access token can never be replayed as a refresh token (or vice
-// versa) even if the secrets were ever the same. The signature lets a forged
-// token be rejected before the DB is touched at all; the DB round trip in
-// services/auth.ts is still what actually enforces revocation and rotation,
-// since a valid signature alone doesn't mean the token hasn't already been
-// used/revoked.
 export function signRefreshToken(user: AuthenticatedUser): string {
   return signToken(user, "refresh", env.refreshTokenSecret, env.refreshTokenTtlDays * 24 * 60 * 60);
 }
@@ -70,8 +63,6 @@ export function verifyRefreshToken(token: string): AuthenticatedUser {
   return verifyToken(token, env.refreshTokenSecret, "refresh");
 }
 
-// The DB only ever stores this hash, never the raw token, so a leaked table
-// can't be replayed as a session.
 export function hashRefreshToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }

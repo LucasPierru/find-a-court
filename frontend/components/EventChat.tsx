@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEventChat } from "@/hooks/useEventChat";
 import { formatMessageTime } from "@/lib/format";
@@ -8,11 +9,12 @@ import { Button, Input } from "@/components/ui";
 
 type EventChatProps = {
   eventId: string;
+  onClose?: () => void;
 };
 
-export function EventChat({ eventId }: EventChatProps) {
+export function EventChat({ eventId, onClose }: EventChatProps) {
   const { user } = useAuth();
-  const { messages, sendMessage, isConnected, isLoadingHistory, error } = useEventChat(eventId);
+  const { messages, sendMessage, isLoadingHistory, error } = useEventChat(eventId);
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -28,21 +30,23 @@ export function EventChat({ eventId }: EventChatProps) {
   }
 
   return (
-    <div className="mt-4 flex flex-col rounded-lg border border-zinc-200 dark:border-zinc-800">
+    <div className="flex flex-col rounded-lg border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
         <h3 className="text-sm font-semibold text-black dark:text-zinc-50">Chat</h3>
-        <span
-          className={
-            isConnected
-              ? "text-xs text-emerald-600 dark:text-emerald-400"
-              : "text-xs text-zinc-400 dark:text-zinc-500"
-          }
-        >
-          {isConnected ? "Connected" : "Connecting..."}
-        </span>
+
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close chat"
+            className="text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
-      <div className="flex h-64 flex-col gap-3 overflow-y-auto px-4 py-3">
+      <div className="flex h-96 flex-col gap-3 overflow-y-auto px-4 py-3">
         {isLoadingHistory ? (
           <p className="text-sm text-zinc-500 dark:text-zinc-400">Loading messages...</p>
         ) : messages.length === 0 ? (
@@ -52,6 +56,11 @@ export function EventChat({ eventId }: EventChatProps) {
             const isOwn = message.userId === user?.id;
             return (
               <div key={message.id} className={`flex flex-col ${isOwn ? "items-end" : "items-start"}`}>
+                {!isOwn && (
+                  <span className="mb-0.5 px-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                    {message.userName}
+                  </span>
+                )}
                 <div
                   className={
                     isOwn

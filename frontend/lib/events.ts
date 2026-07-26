@@ -12,8 +12,6 @@ export type EventFilters = {
   location?: string;
 };
 
-// The backend only filters by sportId server-side; keyword/location matching
-// happens here, same as it did against the in-memory mock data before.
 export async function searchEvents(filters: EventFilters): Promise<Event[]> {
   const query = filters.sport ? `?sportId=${encodeURIComponent(filters.sport)}` : "";
   const events = await apiFetch<Event[]>(`/v1/events${query}`);

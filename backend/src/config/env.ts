@@ -21,7 +21,6 @@ export const env = {
     ? Number(process.env.REFRESH_TOKEN_TTL_DAYS)
     : 30,
 
-  // Stub OTP delivery - see .env.example for why this is a fixed code.
   otpStaticCode: process.env.OTP_STATIC_CODE ?? "000000",
   otpTtlMinutes: process.env.OTP_TTL_MINUTES ? Number(process.env.OTP_TTL_MINUTES) : 10,
 };

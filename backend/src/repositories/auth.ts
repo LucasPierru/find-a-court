@@ -39,8 +39,6 @@ export async function createOtpCode(email: string, code: string, expiresAt: Date
   ]);
 }
 
-// Consumes the newest still-valid, unconsumed code for the email in one
-// atomic UPDATE so a code can't be replayed after it's been used once.
 export async function consumeLatestOtpCode(email: string, code: string): Promise<boolean> {
   const result = await pool.query(
     `UPDATE otp_codes

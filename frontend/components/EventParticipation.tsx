@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import type { User } from "shared";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError, apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui";
-import { EventChat } from "@/components/EventChat";
+import { EventChatWidget } from "@/components/EventChatWidget";
 
 type EventParticipationProps = {
   eventId: string;
@@ -19,7 +18,7 @@ export function EventParticipation({
   organizerId,
   initialParticipants,
 }: EventParticipationProps) {
-  const { status, user, accessToken } = useAuth();
+  const { status, user, accessToken, openAuthModal } = useAuth();
   const [participants, setParticipants] = useState(initialParticipants);
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,18 +77,19 @@ export function EventParticipation({
             Join
           </Button>
         ) : status === "unauthenticated" ? (
-          <Link
-            href="/login"
+          <button
+            type="button"
+            onClick={openAuthModal}
             className="text-sm font-medium text-black underline underline-offset-2 dark:text-zinc-50"
           >
             Sign in to join
-          </Link>
+          </button>
         ) : null}
       </div>
 
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-      {isParticipant && <EventChat key={eventId} eventId={eventId} />}
+      {isParticipant && <EventChatWidget key={eventId} eventId={eventId} />}
     </div>
   );
 }

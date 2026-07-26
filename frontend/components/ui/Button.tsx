@@ -1,10 +1,12 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
+import { Loader2 } from "lucide-react";
 import { cn } from "./cn";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "ghost";
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
+  loading?: boolean;
 };
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
@@ -18,19 +20,24 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, variant = "primary", type = "button", ...props },
+  { className, variant = "primary", type = "button", loading = false, disabled, children, ...props },
   ref,
 ) {
   return (
     <button
       ref={ref}
       type={type}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       className={cn(
-        "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+        "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60",
         VARIANT_CLASSES[variant],
         className,
       )}
       {...props}
-    />
+    >
+      {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+      {children}
+    </button>
   );
 });

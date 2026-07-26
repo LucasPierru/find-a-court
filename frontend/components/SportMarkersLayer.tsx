@@ -13,28 +13,17 @@ type SportMarkersLayerProps = {
   refreshToken: number;
 };
 
-// Google's Text Search (New) caps a single request at 20 results.
 const MAX_RESULTS_PER_SPORT = 20;
-// "Overlapping on screen" depends on zoom, not a fixed real-world distance —
-// two markers 100m apart can fully overlap when zoomed out, or sit far apart
-// once zoomed in. So the cluster radius is computed in *pixels* and converted
-// to meters using the zoom level at search time (see metersPerPixel below).
 const CLUSTER_DISTANCE_PX = 30;
 const FAN_OUT_RADIUS_PX = 26;
 const STACK_PEEK_PX = 3;
 const CLUSTER_BUTTON_PX = 28;
-// Must comfortably cover the full fanned-out extent (radius + button size),
-// or the hover-detection box ends before the icons do — the gap between them
-// causes mouseleave to fire mid-hover, snapping the icons back together and
-// re-triggering mouseenter in a jittery loop.
 const HOVER_ZONE_PX = (FAN_OUT_RADIUS_PX + CLUSTER_BUTTON_PX / 2) * 2 + 24;
 
-// Standard Web Mercator meters-per-pixel formula.
 function metersPerPixel(lat: number, zoom: number) {
   return (156_543.03392 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, zoom);
 }
 
-// Flat-earth approximation — fine at the small distances used for clustering.
 function distanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
   const metersPerDegLat = 111_320;
   const metersPerDegLng = 111_320 * Math.cos((a.lat * Math.PI) / 180);
@@ -63,9 +52,6 @@ function clusterByProximity(items: SportPlace[], thresholdMeters: number): Sport
   return clusters;
 }
 
-// Google sometimes returns multiple near-duplicate listings (different place
-// IDs) for what's really one physical spot — they land in the same cluster,
-// so drop repeats of the same sport within a cluster, keeping the first.
 function dedupeClusterBySport(cluster: SportPlace[]): SportPlace[] {
   const seenSportIds = new Set<string>();
   return cluster.filter((item) => {
@@ -114,13 +100,9 @@ export function SportMarkersLayer({ sports, refreshToken }: SportMarkersLayerPro
     );
 
     setPlaces(resultsBySport.flat());
-    // Captured at search time (rather than tracked live) since clusters only
-    // need to be recomputed when new data comes in anyway.
     setClusterThresholdMeters(CLUSTER_DISTANCE_PX * metersPerPixel(center.lat(), zoom));
   }, [apiKey, map, sports]);
 
-  // Re-searches on mount, whenever the active sport list changes, and
-  // whenever the parent bumps `refreshToken` (the shared "search this area").
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- runSearch only sets state after its internal `await`, this is the standard fetch-on-mount effect pattern
     runSearch();
@@ -206,10 +188,6 @@ function ExpandableSportMarkerCluster({ cluster, center, onSelect }: SportMarker
   const count = cluster.length;
 
   return (
-    // `clickable` matters here beyond its name — AdvancedMarker only becomes
-    // pointer-interactive (hover included) once it's marked clickable;
-    // otherwise Google's underlying element sets pointer-events: none on its
-    // content and every mouse event on the children below is silently dropped.
     <AdvancedMarker position={center} clickable>
       <div
         onMouseEnter={() => setIsHovered(true)}
@@ -217,10 +195,6 @@ function ExpandableSportMarkerCluster({ cluster, center, onSelect }: SportMarker
         className="flex items-center justify-center"
         style={{ width: HOVER_ZONE_PX, height: HOVER_ZONE_PX }}
       >
-        {/* Sized to the collapsed icon itself — the badge and buttons below
-            position relative to THIS, not the much bigger hover zone above,
-            so they stay anchored to the marker's actual point regardless of
-            how big the invisible hover-detection area is. */}
         <div
           className="relative"
           style={{ width: CLUSTER_BUTTON_PX, height: CLUSTER_BUTTON_PX }}

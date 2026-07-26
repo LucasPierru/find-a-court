@@ -12,7 +12,6 @@ export function useEventChat(eventId: string) {
   const { accessToken } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
-  const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
@@ -36,12 +35,7 @@ export function useEventChat(eventId: string) {
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      setIsConnected(true);
       socket.emit(SOCKET_EVENTS.EVENT_JOIN, { eventId });
-    });
-
-    socket.on("disconnect", () => {
-      setIsConnected(false);
     });
 
     socket.on(SOCKET_EVENTS.MESSAGE_NEW, (message: Message) => {
@@ -73,5 +67,5 @@ export function useEventChat(eventId: string) {
     [eventId],
   );
 
-  return { messages, sendMessage, isConnected, isLoadingHistory, error };
+  return { messages, sendMessage, isLoadingHistory, error };
 }

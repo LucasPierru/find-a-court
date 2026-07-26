@@ -3,8 +3,6 @@ import { cn } from "./cn";
 
 export type FormProps = FormHTMLAttributes<HTMLFormElement>;
 
-// The recurring `<form className="flex flex-col gap-5">` shell used by
-// every form in the app (CreateEventForm, Login, Register).
 export const Form = forwardRef<HTMLFormElement, FormProps>(function Form(
   { className, ...props },
   ref,

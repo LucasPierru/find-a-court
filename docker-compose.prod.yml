@@ -1,19 +1,7 @@
-# Deployed on the VPS by .github/workflows/deploy.yml. Pulls prebuilt images
-# from GHCR instead of building on the server. Copied to the server alongside
-# the Caddyfile and a hand-maintained backend.env.
-#
-# Manual use on the server:
-#   docker compose pull && docker compose up -d
-
 services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
-    # No published ports - only reachable from other containers on this
-    # compose network, not directly from the internet.
-    # POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB read from backend.env -
-    # keep them in sync with the credentials embedded in DATABASE_URL there
-    # (host must be "postgres", the service name below, not localhost).
     env_file:
       - backend.env
     volumes:
@@ -29,8 +17,6 @@ services:
   backend:
     image: ghcr.io/lucaspierru/find-a-court-backend:latest
     restart: unless-stopped
-    # No published ports - only reachable from other containers on this
-    # compose network (i.e. through Caddy), not directly from the internet.
     environment:
       PORT: "4000"
     env_file:

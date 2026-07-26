@@ -14,9 +14,6 @@ function isGeolocationSupported() {
 }
 
 export function useGeolocation() {
-  // Constant across server and client renders — the actual browser check can
-  // only happen after mount (inside an effect), so it can't inform this
-  // initial value without causing a hydration mismatch.
   const [state, setState] = useState<GeolocationState>({ status: "loading" });
 
   const fetchPosition = useCallback(() => {
@@ -41,7 +38,6 @@ export function useGeolocation() {
     );
   }, []);
 
-  // Exposed so the UI can offer a "Try again" action after a denial/error.
   const requestLocation = useCallback(() => {
     if (!isGeolocationSupported()) {
       setState({ status: "unsupported" });
@@ -53,15 +49,11 @@ export function useGeolocation() {
 
   useEffect(() => {
     if (!isGeolocationSupported()) {
-      // One-time feature detection — can't be known during SSR, so it can't
-      // live in the initial state above.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setState({ status: "unsupported" });
       return;
     }
 
-    // Ask the browser for permission (or read the already-decided state)
-    // as soon as the page loads.
     fetchPosition();
 
     if (!("permissions" in navigator)) return;
@@ -79,9 +71,7 @@ export function useGeolocation() {
           if (permissionStatus?.state === "denied") setState({ status: "denied" });
         };
       })
-      .catch(() => {
-        // Permissions API doesn't support querying "geolocation" in this browser.
-      });
+      .catch(() => {});
 
     return () => {
       cancelled = true;

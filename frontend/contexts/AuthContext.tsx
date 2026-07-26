@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { AuthResponse, User } from "shared";
+import { AuthModal } from "@/components/AuthModal";
 import { logoutSession, refreshSession } from "@/lib/auth-api";
 
 type AuthStatus = "loading" | "authenticated" | "unauthenticated";
@@ -12,6 +13,8 @@ type AuthContextValue = {
   accessToken: string | null;
   login: (session: AuthResponse) => void;
   logout: () => Promise<void>;
+  openAuthModal: () => void;
+  closeAuthModal: () => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -20,10 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // The access token only ever lives in memory, so a full page load has none
-  // - this silently redeems the httpOnly refresh cookie (if any) to restore
-  // the session.
   useEffect(() => {
     let cancelled = false;
 
@@ -47,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(session.user);
     setAccessToken(session.accessToken);
     setStatus("authenticated");
+    setIsAuthModalOpen(false);
   }
 
   async function logout(): Promise<void> {
@@ -57,8 +59,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ status, user, accessToken, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        status,
+        user,
+        accessToken,
+        login,
+        logout,
+        openAuthModal: () => setIsAuthModalOpen(true),
+        closeAuthModal: () => setIsAuthModalOpen(false),
+      }}
+    >
       {children}
+      <AuthModal open={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </AuthContext.Provider>
   );
 }

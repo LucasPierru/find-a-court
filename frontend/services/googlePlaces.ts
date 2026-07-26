@@ -1,6 +1,3 @@
-// Thin client for the Places API (New) REST endpoints, called directly with
-// fetch (no @vis.gl/react-google-maps widget involved) so the UI around it
-// can be fully custom.
 
 const AUTOCOMPLETE_URL = "https://places.googleapis.com/v1/places:autocomplete";
 const SEARCH_TEXT_URL = "https://places.googleapis.com/v1/places:searchText";
@@ -80,8 +77,6 @@ export async function autocompletePlaces(
     },
     body: JSON.stringify({
       input,
-      // Biases (doesn't restrict) results toward the user's location, so
-      // nearby courts/pitches rank above unrelated results with the same name.
       ...(locationBias
         ? {
             locationBias: {
@@ -137,10 +132,6 @@ export async function getPlaceDetails(
   };
 }
 
-// Text Search — used for "find courts/pitches for a sport near here" on the
-// map. Same REST-endpoint approach as autocomplete/details above, so the map
-// discovery layer doesn't depend on @vis.gl/react-google-maps's Places
-// library wrapper (only the Maps JS API itself, for rendering the map).
 export async function searchPlacesByText(
   textQuery: string,
   apiKey: string,

@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { AuthButton } from "@/components/AuthButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NavLinks } from "@/components/NavLinks";
+import { MobileNavMenu } from "@/components/MobileNavMenu";
 import { PAGE_WIDTH_CLASS } from "@/lib/layout";
 
 export function Navbar() {
@@ -18,7 +20,11 @@ export function Navbar() {
             <NavLinks />
           </div>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-3">
+          <AuthButton />
+          <ThemeToggle />
+          <MobileNavMenu />
+        </div>
       </div>
     </header>
   );

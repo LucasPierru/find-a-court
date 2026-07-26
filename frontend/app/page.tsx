@@ -2,9 +2,11 @@ import Link from "next/link";
 import { FindCourtView } from "@/components/FindCourtView";
 import { EventCard } from "@/components/EventCard";
 import { getRecentEvents } from "@/lib/events";
+import { getSportPhotoUrls } from "@/lib/unsplash";
 
 export default async function Home() {
   const recentEvents = await getRecentEvents();
+  const sportPhotoUrls = await getSportPhotoUrls();
 
   return (
     <div className="flex w-full flex-1 flex-col gap-4">
@@ -22,7 +24,7 @@ export default async function Home() {
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {recentEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCard key={event.id} event={event} imageUrl={sportPhotoUrls[event.sportId]} />
           ))}
         </div>
       </section>

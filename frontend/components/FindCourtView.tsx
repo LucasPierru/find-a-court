@@ -22,11 +22,7 @@ export function FindCourtView() {
   const [activeSport, setActiveSport] = useState<SportSlug | null>(null);
 
   return (
-    <div className="flex w-full flex-1 flex-col gap-4">
-      {/* <h1 className="mx-auto w-full max-w-3xl px-6 text-3xl font-semibold tracking-tight text-black dark:text-zinc-50">
-        Find a Court
-      </h1> */}
-
+    <div className="flex w-full flex-col gap-4">
       <div className="relative h-[600px] w-full overflow-hidden rounded-lg">
         <CourtMap
           userPosition={geolocation.status === "success" ? geolocation.position : null}

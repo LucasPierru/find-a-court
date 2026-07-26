@@ -1,9 +1,6 @@
 import { z } from "zod";
 import { messageSchema } from "./message";
 
-// Chat is scoped to an event's room: clients join with `event:join`, send
-// with `message:send`, and everyone in the room (including the sender) gets
-// the persisted message back via `message:new`.
 export const SOCKET_EVENTS = {
   EVENT_JOIN: "event:join",
   EVENT_LEAVE: "event:leave",

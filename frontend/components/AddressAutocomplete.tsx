@@ -20,9 +20,6 @@ export type SelectedPlace = {
 
 type AddressAutocompleteProps = {
   onPlaceSelected: (place: SelectedPlace) => void;
-  /** Fired on every keystroke (not just on selecting a suggestion), so a
-   * bound form field stays in sync even if the user types freely without
-   * picking a result. */
   onQueryChange?: (value: string) => void;
   defaultValue?: string;
   locationBias?: LocationBias;
@@ -72,7 +69,6 @@ export function AddressAutocomplete({
       });
   }, DEBOUNCE_MS);
 
-  // Cancel any pending debounce/fetch on unmount.
   useEffect(() => {
     return () => {
       search.cancel();
@@ -116,7 +112,6 @@ export function AddressAutocomplete({
         placeId: details.placeId,
       });
     } catch {
-      // Fall back to just the prediction text if the details lookup fails.
       onPlaceSelected({
         name: suggestion.primaryText,
         address: suggestion.secondaryText,

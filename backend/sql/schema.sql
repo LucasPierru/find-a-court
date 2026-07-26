@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- id is the slug (e.g. "tennis"), matching shared/src/sport.ts's SPORT_DEFINITIONS.
 CREATE TABLE IF NOT EXISTS sports (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -49,8 +48,6 @@ CREATE INDEX IF NOT EXISTS events_sport_id_idx ON events(sport_id);
 CREATE INDEX IF NOT EXISTS events_organizer_id_idx ON events(organizer_id);
 CREATE INDEX IF NOT EXISTS events_start_time_idx ON events(start_time);
 
--- Who's "on" an event - drives both the participant_limit check and who's
--- allowed into that event's chat room.
 CREATE TABLE IF NOT EXISTS event_participants (
   event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -60,8 +57,6 @@ CREATE TABLE IF NOT EXISTS event_participants (
 
 CREATE INDEX IF NOT EXISTS event_participants_user_id_idx ON event_participants(user_id);
 
--- Keyed by email, not user_id: a code can be requested before the account
--- exists (first-time signup verifies and creates the user in one step).
 CREATE TABLE IF NOT EXISTS otp_codes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT NOT NULL,
@@ -73,9 +68,6 @@ CREATE TABLE IF NOT EXISTS otp_codes (
 
 CREATE INDEX IF NOT EXISTS otp_codes_email_idx ON otp_codes(email);
 
--- Stores a hash of the refresh token (never the raw value) so rotation and
--- revocation can be enforced server-side even though the token itself only
--- ever lives in the client's httpOnly cookie.
 CREATE TABLE IF NOT EXISTS refresh_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

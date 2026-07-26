@@ -8,8 +8,6 @@ export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // resolvedTheme is only known after mount (it depends on the client's DOM/system state),
-  // so we render a neutral placeholder until then to avoid a hydration mismatch.
   // eslint-disable-next-line react-hooks/set-state-in-effect -- documented next-themes pattern, single one-time flip
   useEffect(() => setMounted(true), []);
 

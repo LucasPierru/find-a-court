@@ -1,8 +1,5 @@
 import { z } from "zod";
 
-// `placesQuery` is the free-text query used for Google Places text search —
-// Places has no granular "tennis_court"/"padel_court" place types, so a
-// per-sport keyword is the practical way to find courts/pitches for a sport.
 const SPORT_DEFINITIONS = [
   { id: "tennis", name: "Tennis", placesQuery: "tennis court", icon: "🎾" },
   { id: "padel", name: "Padel", placesQuery: "padel court", icon: "🥎" },

@@ -5,6 +5,7 @@ import { AppError } from "../utils/errors";
 const EVENT_COLUMNS = `
   e.id, e.title, e.description, e.sport_id, e.organizer_id, e.start_time,
   e.participant_limit, e.is_free, e.price,
+  (SELECT COUNT(*) FROM event_participants ep WHERE ep.event_id = e.id) AS participant_count,
   l.id AS location_id, l.name AS location_name, l.address AS location_address,
   l.lat AS location_lat, l.lng AS location_lng, l.place_id AS location_place_id
 `;
@@ -19,6 +20,7 @@ interface EventRow {
   participant_limit: number | null;
   is_free: boolean;
   price: string | null;
+  participant_count: string;
   location_id: string;
   location_name: string;
   location_address: string;
@@ -36,6 +38,7 @@ function toEvent(row: EventRow): Event {
     organizerId: row.organizer_id,
     startTime: row.start_time.toISOString(),
     participantLimit: row.participant_limit ?? undefined,
+    participantCount: Number(row.participant_count),
     isFree: row.is_free,
     price: row.price !== null ? Number(row.price) : undefined,
     location: {
@@ -119,8 +122,6 @@ export async function create(input: CreateEvent, organizerId: string): Promise<E
     );
     const eventId = eventResult.rows[0].id;
 
-    // The organizer is automatically a participant, so they land in the
-    // event's chat room without a separate join.
     await client.query("INSERT INTO event_participants (event_id, user_id) VALUES ($1, $2)", [
       eventId,
       organizerId,
@@ -191,8 +192,6 @@ export async function listParticipants(eventId: string): Promise<User[]> {
   return result.rows.map((row) => ({ id: row.id, name: row.name, email: row.email }));
 }
 
-// The "event full" check has to happen inside this transaction (with a row
-// lock) to avoid a race between two joins.
 export async function addParticipant(eventId: string, userId: string): Promise<void> {
   const client = await pool.connect();
   try {

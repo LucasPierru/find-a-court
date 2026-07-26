@@ -5,8 +5,6 @@ import { AppError } from "../utils/errors";
 import { parseOrThrow } from "../utils/parse";
 import * as usersRepository from "../repositories/users";
 
-// No POST here: accounts are created as a side effect of
-// POST /v1/auth/otp/verify, not through this resource directly.
 const usersRouter = Router();
 
 usersRouter.get("/me", requireAuth, async (req, res, next) => {

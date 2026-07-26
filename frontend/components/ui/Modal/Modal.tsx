@@ -15,8 +15,6 @@ type ModalProps = {
 export function Modal({ open, onClose, children, className }: ModalProps) {
   const [mounted, setMounted] = useState(false);
 
-  // Portals need a real DOM node, which only exists on the client — same
-  // mounted-flag pattern as ThemeToggle, to avoid an SSR crash on document.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time client-mount flip, see ThemeToggle for the same pattern
     setMounted(true);

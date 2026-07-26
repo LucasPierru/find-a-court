@@ -34,18 +34,13 @@ export async function verifyOtp(email: string, code: string, name?: string): Pro
 }
 
 export async function refreshSession(refreshToken: string): Promise<AuthTokens> {
-  // Checks the signature, `type: "refresh"` claim, and expiry - rejects a
-  // forged or tampered token before the DB is even touched.
   const payload = verifyRefreshToken(refreshToken);
 
-  // The signature alone doesn't mean the token hasn't already been rotated
-  // or revoked - that's only tracked here, in the DB.
   const tokenHash = hashRefreshToken(refreshToken);
   const existing = await authRepository.findValidRefreshToken(tokenHash);
   if (!existing || existing.userId !== payload.id) {
     throw new AppError(401, "Invalid or expired refresh token");
   }
-  // Rotate on every use: the old token is dead the moment it's redeemed.
   await authRepository.revokeRefreshToken(tokenHash);
 
   const user = await authRepository.findUserById(existing.userId);

@@ -8,8 +8,6 @@ type FieldProps = {
   children: ReactNode;
 };
 
-// The recurring "label + control + error/hint" shape used by every form in
-// this app (CreateEventForm, Login, Register, EventFilterBar).
 export function Field({ label, htmlFor, error, hint, children }: FieldProps) {
   return (
     <label htmlFor={htmlFor} className="flex flex-col gap-1 text-sm">

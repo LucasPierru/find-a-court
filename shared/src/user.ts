@@ -8,9 +8,6 @@ export const userSchema = z.object({
 
 export type User = z.infer<typeof userSchema>;
 
-// Auth is passwordless: a one-time code is emailed to the user. Verifying it
-// logs the user in, creating the account on first verification (hence the
-// optional `name`, only required the first time a given email verifies).
 export const requestOtpSchema = z.object({
   email: z.email(),
 });
