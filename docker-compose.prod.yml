@@ -6,6 +6,26 @@
 #   docker compose pull && docker compose up -d
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    # No published ports - only reachable from other containers on this
+    # compose network, not directly from the internet.
+    # POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB read from backend.env -
+    # keep them in sync with the credentials embedded in DATABASE_URL there
+    # (host must be "postgres", the service name below, not localhost).
+    env_file:
+      - backend.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./backend/sql/seed-sports.sql:/docker-entrypoint-initdb.d/02-seed-sports.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-find_a_court}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     image: ghcr.io/lucaspierru/find-a-court-backend:latest
     restart: unless-stopped
@@ -15,6 +35,9 @@ services:
       PORT: "4000"
     env_file:
       - backend.env
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   frontend:
     image: ghcr.io/lucaspierru/find-a-court-frontend:latest
