@@ -79,7 +79,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
-          source: docker-compose.prod.yml,Caddyfile
+          source: docker-compose.prod.yml,Caddyfile,backend/sql
           target: ${{ secrets.DEPLOY_PATH }}
           strip_components: 0
 
